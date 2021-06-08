@@ -5,8 +5,9 @@ import User from '../models/user.js';
 import {uploader} from '../config/cloudinary.js';
 
 class AdminController {
+  /* LOG IN */
   async logIn(req, res, next) {
-    const { username, password } = req.body;
+    const {username, password} = req.body;
     try {
       //Check If User Exists
       let foundUser = await User.findOne({username});
@@ -15,7 +16,7 @@ class AdminController {
           error: 'Ningun usuario bajo este nombre'
         });
       }
-      const { user } = await User.authenticate()(username, password);
+      const {user} = await User.authenticate()(username, password);
       if (!user) {
         return res.status(401).json({
           error: 'Alguno de los datos proporcionados es incorrecto'
@@ -31,12 +32,102 @@ class AdminController {
       return next(err);
     }
   }
+  /* GET ITEMS IN A LABEL */
+  async getList(req, res, next) {
+    const labelToGet = req.params.label;
+    try {
+      const list = await File.find({label: labelToGet});
+      const imagesList = await Image.find({label: labelToGet});
+      const data = [];
+      if (list && imagesList) {
+        list.map(item => {
+          let imagesPerFolder = imagesList.filter(img => img.folder == item._id);
+          if (imagesPerFolder.length > 0) {
+            let imagesData = [];
+            imagesPerFolder = imagesPerFolder.map(img => {
+              let newImg = {
+                path: img.cloud_id,
+                url: img.url
+              };
+              imagesData.push(newImg);
+            });
+            let itemToSend = {
+              label: item.label,
+              category: item.category,
+              title: item.title,
+              route_title: item.route_title,
+              description: item.description,
+              videoLink: item.videoLink,
+              images: imagesData
+            };
+            data.push(itemToSend);
+          } else {
+            let itemToSend = {
+              label: item.label,
+              category: item.category,
+              title: item.title,
+              route_title: item.route_title,
+              description: item.description,
+              videoLink: item.videoLink
+            };
+            data.push(itemToSend);
+          }  
+        });
+        return res.status(200).send(data);
+      }
+    } catch(err) {
+      next(err);
+    }
+  }
+  /* GET ITEM */
+  async getItem(req, res, next) {
+    const labelToGet = req.params.label;
+    const routeTitle = req.params.name;
+    try {
+      const item = await File.findOne({label: labelToGet, route_title: routeTitle});
+      const imagesList = await Image.find({folder: item._id});
+      if (item && imagesList) {
+        if (imagesList.length > 0) {
+          let imagesData = [];
+          imagesList.map(img => {
+            let newImg = {
+              path: img.cloud_id,
+              url: img.url
+            };
+            imagesData.push(newImg);
+          });
+          let itemToSend = {
+            label: item.label,
+            category: item.category,
+            title: item.title,
+            route_title: item.route_title,
+            description: item.description,
+            videoLink: item.videoLink,
+            images: imagesData
+          };
+          return res.status(200).send(itemToSend);
+        } else {
+          let itemToSend = {
+            label: item.label,
+            category: item.category,
+            title: item.title,
+            route_title: item.route_title,
+            description: item.description,
+            videoLink: item.videoLink
+          };
+          return res.status(200).send(itemToSend);
+        }
+      }
+    } catch(err) {
+      next(err);
+    }
+  }
+  /* NEW ITEM */
   async newItem(req, res, next) {
     let {label, category, title, description, videoLink} = req.body;
     title = title.trim();
     let routeTitle = title.toLowerCase();
     routeTitle = routeTitle.replace(/ /g, '_');
-    const images = res.locals.images;
     try {
       const item = await new File({
         label: label,
@@ -46,23 +137,26 @@ class AdminController {
         description: description,
         videoLink: videoLink
       }).save();
-      const newImages = await images.map(img => {
-        new Image({
-          cloud_id: img.public_id,
-          label: item.label,
-          folder: item._id,
-          url: img.url
-        }).save();
-      });
-      if (item && newImages) {
-        return res.status(201).send('Item creado con exito');
+      //Ask for imgs
+      if ('files' in req) {
+        const images = res.locals.images;
+        const newImages = await images.map(img => {
+          new Image({
+            cloud_id: img.public_id,
+            label: item.label,
+            folder: item._id,
+            url: img.url
+          }).save();
+        });
       }
+      return res.status(201).send('Item creado con exito');
     } catch(err) {
       next(err);
     }
   }
+  /* UPDATE ITEM */
   async updateItem(req, res, next) {
-    const {id} = req.params;
+    const {name} = req.params;
     const updateItem = req.body;
     for (let prop in updateItem) {
       if (updateItem[prop] === null || updateItem[prop] === undefined || updateItem[prop].length === 0) {
@@ -77,7 +171,7 @@ class AdminController {
       updateItem.route_title = routeTitle;
     }
     try {
-      const file = await File.findOneAndUpdate({_id: id}, updateItem, { new: true });
+      const file = await File.findOneAndUpdate({route_title: name}, updateItem, {new: true});
       //If images was deleted
       if (updateItem.deleteImgs != undefined) {
         let deletePromises = updateItem.deleteImgs.map(path => Image.deleteOne({cloud_id: path}));
@@ -104,14 +198,14 @@ class AdminController {
       next(err);
     }
   }
+  /* DELETE ITEM */
   async deleteItem(req, res, next) {
-    const {id} = req.params;
+    const {name} = req.params;
     try {
       //Delete the folder and use his id to delete Images model and cloud host
-      let folder= await File.findOneAndDelete({_id: id});
-      let imagesToDelete = await Image.find({folder: folder._id});
-      //Check if file have images
-      if (imagesToDelete.length > 0) {
+      let folder = await File.findOneAndDelete({route_title: name});
+      if ('images' in folder) {
+        let imagesToDelete = await Image.find({folder: folder._id});
         imagesToDelete = imagesToDelete.map(({cloud_id}) => uploader.destroy(cloud_id));
         let cloudDeleted = Promise.all(imagesToDelete);
         let imagesDeleted = await Image.deleteMany({folder: folder._id});

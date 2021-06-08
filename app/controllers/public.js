@@ -19,7 +19,17 @@ class PublicController {
       if (list && imagesList) {
         list.map(item => {
           let imagesPerFolder = imagesList.filter(img => img.folder == item._id);
-          data.push({item, images: imagesPerFolder});
+          imagesPerFolder = imagesPerFolder.map(img => img.url);
+          let itemPublic = {
+            label: item.label,
+            category: item.category,
+            title: item.title,
+            route_title: item.route_title,
+            description: item.description,
+            videoLink: item.videoLink,
+            images: imagesPerFolder
+          };
+          data.push(itemPublic);
         });
       }
       return res.status(200).send(data);
@@ -32,11 +42,18 @@ class PublicController {
     let routeTitle = req.params.name;
     try {
       const item = await File.findOne({route_title: routeTitle, label: labelToGet});
-      const images = await Image.find({folder: item._id});
-      return res.status(200).json({
-        item: item,
+      let images = await Image.find({folder: item._id});
+      images = images.map(img => img.url);
+      let itemPublic = {
+        label: item.label,
+        category: item.category,
+        title: item.title,
+        route_title: item.route_title,
+        description: item.description,
+        videoLink: item.videoLink,
         images: images
-      });
+      };
+      return res.status(200).send(itemPublic);
     } catch(err) {
       next(err);
     }

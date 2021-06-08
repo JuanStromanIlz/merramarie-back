@@ -3,7 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 const app = express();
 app.use(express.json({limit: '20mb'}));
-app.use(express.urlencoded({ extended: false, limit: '20mb' }));
+app.use(express.urlencoded({extended: false, limit: '20mb'}));
 
 /* MONGOOSE SETUP */
 import dbConfig from './app/config/db.js';

@@ -5,8 +5,8 @@ const adminRouter = express.Router();
 import passport from '../middleware/passport.js';
 
 /* UPLOAD IMAGES SETUP */
-import { cloudinaryConfig } from '../config/cloudinary.js';
-import { multerUploads, formatToUpload } from '../middleware/multer.js';
+import {cloudinaryConfig} from '../config/cloudinary.js';
+import {multerUploads, formatToUpload} from '../middleware/multer.js';
 adminRouter.use('*', cloudinaryConfig);
 
 /* IMPORT ADMIN CONTROLLER */
@@ -15,10 +15,17 @@ const adminCont = new AdminController();
 /* CHECK IF FOLDER EXISTS */
 import alreadyExists from '../middleware/alreadyExists.js';
 
-adminRouter.post('/', adminCont.logIn);
-adminRouter.post('/new', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.newItem);
-adminRouter.patch('/:id', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.updateItem);
-adminRouter.patch('/new_imgs/:id', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.updateItem);
-adminRouter.delete('/:id', passport.authenticate('jwt',{session: false}), adminCont.deleteItem);
+adminRouter.post('/log_in', adminCont.logIn);
+//Get items
+adminRouter.get('/items/:label', passport.authenticate('jwt',{session: false}), adminCont.getList);
+adminRouter.get('/items/:label/:name', passport.authenticate('jwt',{session: false}), adminCont.getItem);
+//New item
+adminRouter.post('/new', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.newItem);
+adminRouter.post('/new_with_imgs', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.newItem);
+//Edit item
+adminRouter.patch('/edit/:name', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.updateItem);
+adminRouter.patch('/edit_new_imgs/:name', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.updateItem);
+//Delete item
+adminRouter.delete('/delete/:name', passport.authenticate('jwt',{session: false}), adminCont.deleteItem);
 
 export default adminRouter;
