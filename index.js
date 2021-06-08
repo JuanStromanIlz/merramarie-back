@@ -11,7 +11,8 @@ import dbConfig from './app/config/db.js';
 mongoose.connect(dbConfig.online, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useCreateIndex: true
+  useCreateIndex: true,
+  useFindAndModify: false
 })
 .then(() => {
   console.log('Connected to the database!');

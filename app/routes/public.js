@@ -7,6 +7,6 @@ const publicCont = new PublicController();
 
 publicRouter.get('/', publicCont.getHomeFiles);
 publicRouter.get('/:label', publicCont.getList);
-publicRouter.get('/:label/:id', publicCont.getItem)
+publicRouter.get('/:label/:name', publicCont.getItem);
 
 export default publicRouter;

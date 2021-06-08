@@ -4,6 +4,7 @@ const filesSchema = new mongoose.Schema({
   label: String,
   category: String,
   title: String,
+  route_title: String,
   description: String,
   videoLink: String
 });

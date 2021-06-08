@@ -26,11 +26,10 @@ const multerUploads = multer({
 const formatToUpload = async(req, res, next) => {
   try {
     let pictureFiles = req.files;
-    let folderName = req.body.title;
     //Map through images and create a promise array using cloudinary upload function
     let multiplePicturePromise = pictureFiles.map((picture) =>
       uploader.upload(`data:${picture.mimetype};base64,${picture.buffer.toString('base64')}`, {
-        folder: `/portfolio/${folderName}`
+        folder: 'portfolio'
       })
     );
     //Await all the cloudinary upload functions in promise.all

@@ -17,7 +17,8 @@ import alreadyExists from '../middleware/alreadyExists.js';
 
 adminRouter.post('/', adminCont.logIn);
 adminRouter.post('/new', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.newItem);
-adminRouter.patch('/:id', passport.authenticate('jwt',{session: false}), adminCont.updateItem);
+adminRouter.patch('/:id', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.updateItem);
+adminRouter.patch('/new_imgs/:id', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.updateItem);
 adminRouter.delete('/:id', passport.authenticate('jwt',{session: false}), adminCont.deleteItem);
 
 export default adminRouter;

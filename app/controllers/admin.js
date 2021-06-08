@@ -32,19 +32,24 @@ class AdminController {
     }
   }
   async newItem(req, res, next) {
-    const {label, category, title, description, videoLink} = req.body;
+    let {label, category, title, description, videoLink} = req.body;
+    title = title.trim();
+    let routeTitle = title.toLowerCase();
+    routeTitle = routeTitle.replace(/ /g, '_');
     const images = res.locals.images;
     try {
       const item = await new File({
         label: label,
         category: category,
         title: title,
+        route_title: routeTitle,
         description: description,
         videoLink: videoLink
       }).save();
       const newImages = await images.map(img => {
         new Image({
           cloud_id: img.public_id,
+          label: item.label,
           folder: item._id,
           url: img.url
         }).save();
@@ -64,38 +69,57 @@ class AdminController {
         delete updateItem[prop];
       }
     }
+    if ('title' in updateItem) {
+      let title = updateItem.title.trim();
+      let routeTitle = title.toLowerCase();
+      routeTitle = routeTitle.replace(/ /g, '_');
+      updateItem.title = title;
+      updateItem.route_title = routeTitle;
+    }
     try {
-      const file = await File.updateOne({_id: id}, updateItem, { new: true });
-      if (file) {
-        return res.status(201).json('Item editado con exito');
+      const file = await File.findOneAndUpdate({_id: id}, updateItem, { new: true });
+      //If images was deleted
+      if (updateItem.deleteImgs != undefined) {
+        let deletePromises = updateItem.deleteImgs.map(path => Image.deleteOne({cloud_id: path}));
+        let deletedImages = Promise.all(deletePromises);
+        if (deletedImages) {
+          let cloudPromises = updateItem.deleteImgs.map(path => uploader.destroy(path));
+          Promise.all(cloudPromises);
+        }
       }
+      //If new imgs are being added
+      if ('files' in req) {
+        const images = res.locals.images;
+        const newImages = await images.map(img => {
+          new Image({
+            cloud_id: img.public_id,
+            label: file.label,
+            folder: file._id,
+            url: img.url
+          }).save();
+        });
+      }
+      return res.status(201).send('Item editado con exito');
     } catch(err) {
       next(err);
     }
   }
   async deleteItem(req, res, next) {
     const {id} = req.params;
-    // try {
-    //   let folderName = await File.findOne({_id: id});
-    //   folderName = folderName.title;
-    //   let imagesToDelete = await Image.find({folder: id});
-    //   imagesToDelete = imagesToDelete.map(({cloud_id}) => cloud_id);
-    //   const deleteFolder = await File.deleteOne({_id: id});
-    //   const deleteImages = await Image.deleteMany({folder: id});
-    //   if (deleteFolder && deleteImages) {
-    //     api.delete_resources(imagesToDelete, (err, res) => {
-    //       if (!err) {
-    //         api.delete_folder(folderName, (err, res) => {
-    //           if (!err) {
-    //             return res.status(200).send('Item eliminado con exito');
-    //           }
-    //         });
-    //       }
-    //     });
-    //   }
-    // } catch(err) {
-    //   next(err);
-    // }
+    try {
+      //Delete the folder and use his id to delete Images model and cloud host
+      let folder= await File.findOneAndDelete({_id: id});
+      let imagesToDelete = await Image.find({folder: folder._id});
+      //Check if file have images
+      if (imagesToDelete.length > 0) {
+        imagesToDelete = imagesToDelete.map(({cloud_id}) => uploader.destroy(cloud_id));
+        let cloudDeleted = Promise.all(imagesToDelete);
+        let imagesDeleted = await Image.deleteMany({folder: folder._id});
+      }
+      return res.status(200).send('Item eliminado con exito');
+    } catch(err) {
+      next(err);
+    }
   }
 }
 
