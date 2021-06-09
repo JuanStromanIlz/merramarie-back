@@ -27,9 +27,8 @@ import passport from './app/middleware/passport.js';
 app.use(passport.initialize());
 
 /* CORS CONFIG */
-
 import cors from 'cors';
-if (process.env.DEV == 'true') {
+if (process.env.CORS == 'true') {
   const corsOptions = {
     origin: [process.env.FRONTEND_HOST],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
@@ -41,14 +40,26 @@ if (process.env.DEV == 'true') {
   };
   app.use(cors(corsOptions));
   app.options('*', cors(corsOptions));
-  console.log('.----- API IS ON DEV, USING CORS ------------------.');
+  console.log('.----- API IS USING CORS ------------------.');
 }
 
 /* ROUTER LIST */
 import publicRouter from './app/routes/public.js';
 import adminRouter from './app/routes/admin.js';
 
-app.use('/', publicRouter);
+app.get('/', (req, res) => {
+  res.json({
+    owner: {
+      name: 'Merra Marie',
+      visit_web_site: `${process.env.FRONTEND_HOST}`
+    },
+    author: {
+      name: 'Juan Stroman Ilz',
+      contact: 'https://www.linkedin.com/in/jstromanilz'
+    }    
+  });
+});
+app.use('/public', publicRouter);
 app.use('/panel', adminRouter);
 app.use((err, req, res, next) => {
   return res.status(500).send(err.toString());

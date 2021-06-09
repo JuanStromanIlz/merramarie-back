@@ -2,22 +2,18 @@ import File from '../models/file.js';
 import Image from '../models/image.js';
 
 class PublicController {
-  /* GET ALL FILES */
+  /* GET HOME IMAGES */
   async getHomeFiles(req, res, next) {
     try {
+     let homeImages = await Image.find({label: 'homepage'});
+     if (homeImages) {
       let list = [];
-      let categories = ['editorial', 'artworks', 'commercial', 'film', 'exhibition', 'publication'];
-      let images = await Image.find();
-      if (images) {
-        categories.map(cat => {
-          let firstItem = images.find(img => img.label === cat);
-          if (firstItem) {
-            let url = firstItem.url;
-            list.push(url);
-          }
-        });
-        return res.send(list);
-      }
+      homeImages.map(img => {
+        let imgToSend = img.url;
+        list.push(imgToSend);
+      });
+      return res.send(list);
+     }
     } catch(err) {
       next(err);
     }
