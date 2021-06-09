@@ -26,6 +26,24 @@ mongoose.connect(dbConfig.online, {
 import passport from './app/middleware/passport.js';
 app.use(passport.initialize());
 
+/* CORS CONFIG */
+
+import cors from 'cors';
+if (process.env.DEV == 'true') {
+  const corsOptions = {
+    origin: [process.env.FRONTEND_HOST],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders:  ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Authorization'],
+    optionsSuccessStatus: 200,
+    credentials: true,
+    maxAge: 3600
+  };
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
+  console.log('.----- API IS ON DEV, USING CORS ------------------.');
+}
+
 /* ROUTER LIST */
 import publicRouter from './app/routes/public.js';
 import adminRouter from './app/routes/admin.js';
@@ -36,8 +54,7 @@ app.use((err, req, res, next) => {
   return res.status(500).send(err.toString());
 });
 
-
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, ()=>{
+app.listen(PORT, () => {
   console.log(`Server runnig on port ${PORT}`);
 });
