@@ -12,7 +12,7 @@ class PublicController {
         let imgToSend = img.url;
         list.push(imgToSend);
       });
-      return res.send(list);
+      return res.status(200).json(list);
      }
     } catch(err) {
       next(err);
@@ -57,7 +57,7 @@ class PublicController {
           } 
         });
       }
-      return res.status(200).send(data);
+      return res.status(200).json(data);
     } catch(err) {
       next(err);
     }
@@ -85,7 +85,7 @@ class PublicController {
             videoLink: item.videoLink,
             images: imagesData
           };
-          return res.status(200).send(itemToSend);
+          return res.status(200).json(itemToSend);
         } else {
           let itemToSend = {
             label: item.label,
@@ -95,7 +95,7 @@ class PublicController {
             description: item.description,
             videoLink: item.videoLink
           };
-          return res.status(200).send(itemToSend);
+          return res.status(200).json(itemToSend);
         }
       }
     } catch(err) {

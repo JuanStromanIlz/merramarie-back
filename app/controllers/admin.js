@@ -26,7 +26,7 @@ class AdminController {
         const token = jwt.sign({
           id: user._id
         }, process.env.JWT_SECRET);
-        return res.status(200).send(token);
+        return res.status(200).json(token);
       }
     } catch(err) {
       return next(err);
@@ -73,7 +73,7 @@ class AdminController {
             data.push(itemToSend);
           }  
         });
-        return res.status(200).send(data);
+        return res.status(200).json(data);
       }
     } catch(err) {
       next(err);
@@ -105,7 +105,7 @@ class AdminController {
             videoLink: item.videoLink,
             images: imagesData
           };
-          return res.status(200).send(itemToSend);
+          return res.status(200).json(itemToSend);
         } else {
           let itemToSend = {
             label: item.label,
@@ -115,7 +115,7 @@ class AdminController {
             description: item.description,
             videoLink: item.videoLink
           };
-          return res.status(200).send(itemToSend);
+          return res.status(200).json(itemToSend);
         }
       }
     } catch(err) {
@@ -149,7 +149,7 @@ class AdminController {
           }).save();
         });
       }
-      return res.status(201).send('Item creado con exito');
+      return res.status(201).json({message: 'Item creado con exito'});
     } catch(err) {
       next(err);
     }
@@ -193,7 +193,7 @@ class AdminController {
           }).save();
         });
       }
-      return res.status(201).send('Item editado con exito');
+      return res.status(201).json({message: 'Item editado con exito'});
     } catch(err) {
       next(err);
     }
@@ -210,7 +210,7 @@ class AdminController {
         let cloudDeleted = Promise.all(imagesToDelete);
         let imagesDeleted = await Image.deleteMany({folder: folder._id});
       }
-      return res.status(200).send('Item eliminado con exito');
+      return res.status(200).json({message: 'Item eliminado con exito'});
     } catch(err) {
       next(err);
     }
