@@ -81,10 +81,9 @@ class AdminController {
   }
   /* GET ITEM */
   async getItem(req, res, next) {
-    const labelToGet = req.params.label;
     const routeTitle = req.params.name;
     try {
-      const item = await File.findOne({label: labelToGet, route_title: routeTitle});
+      const item = await File.findOne({route_title: routeTitle});
       const imagesList = await Image.find({folder: item._id});
       if (item && imagesList) {
         if (imagesList.length > 0) {

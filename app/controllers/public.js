@@ -18,6 +18,22 @@ class PublicController {
       next(err);
     }
   }
+  /* GET LABELS */
+  async getAllLabels(req, res, next) {
+    try {
+      let data = await File.find({});
+      if (data) {
+        let labelsArray = [];
+        data = [...new Map(data.map(item => [item['label'], item])).values()];
+        data.map(item => {
+          labelsArray.push(item.label);
+        });
+        return res.status(200).json(labelsArray);
+      }
+    } catch(err) {
+      next(err);
+    }
+  }
   /* GET LABEL */
   async getList(req, res, next) {
     let labelToGet = req.params.label;
@@ -64,10 +80,9 @@ class PublicController {
   }
   /* GET ITEM */
   async getItem(req, res, next) {
-    let labelToGet = req.params.label;
     let routeTitle = req.params.name;
     try {
-      const item = await File.findOne({route_title: routeTitle, label: labelToGet});
+      const item = await File.findOne({route_title: routeTitle});
       let images = await Image.find({folder: item._id});
       if (item && images) {
         if (images.length > 0) {
