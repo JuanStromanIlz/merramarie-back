@@ -157,8 +157,13 @@ class AdminController {
   async updateItem(req, res, next) {
     const {name} = req.params;
     const updateItem = req.body;
+    const keysToDelete = {};
     for (let prop in updateItem) {
-      if (updateItem[prop] === null || updateItem[prop] === undefined || updateItem[prop].length === 0) {
+      if (updateItem[prop] === null || updateItem[prop] === undefined) {
+        delete updateItem[prop];
+      }
+      if (updateItem[prop].length === 0) {
+        keysToDelete[prop] = 1;
         delete updateItem[prop];
       }
     }
@@ -170,7 +175,8 @@ class AdminController {
       updateItem.route_title = routeTitle;
     }
     try {
-      const file = await File.findOneAndUpdate({route_title: name}, updateItem, {new: true});
+      const changesToItem = { $set: {...updateItem}, $unset: {...keysToDelete}};
+      const file = await File.findOneAndUpdate({route_title: name}, changesToItem, {new: true});
       //If images was deleted
       if (updateItem.deleteImgs != undefined) {
         let deletePromises = updateItem.deleteImgs.map(path => Image.deleteOne({cloud_id: path}));
