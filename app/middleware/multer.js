@@ -9,7 +9,8 @@ const fileFilter = (req, file, cb) => {
     file.mimetype === 'image/jpg' ||
     file.mimetype === 'image/jpeg' ||
     file.mimetype === 'image/gif' ||
-    file.mimetype === 'image/png'
+    file.mimetype === 'image/png'  ||
+    file.mimetype === 'image/webp'
   ) {
     cb(null, true);
   }else{
@@ -34,7 +35,7 @@ const formatToUpload = async(req, res, next) => {
     );
     //Await all the cloudinary upload functions in promise.all
     let imageResponses = await Promise.all(multiplePicturePromise);
-    let images = imageResponses.map(({public_id, url}) => ({public_id, url}));
+    let images = imageResponses.map(({public_id, secure_url, width, height}) => ({public_id, secure_url, width, height}));
     //Passing to the next middleware
     res.locals.images = images;
     next();

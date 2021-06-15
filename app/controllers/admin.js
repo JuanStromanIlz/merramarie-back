@@ -47,6 +47,8 @@ class AdminController {
             imagesPerFolder = imagesPerFolder.map(img => {
               let newImg = {
                 path: img.cloud_id,
+                width: img.width,
+                height: img.height,
                 url: img.url
               };
               imagesData.push(newImg);
@@ -91,6 +93,8 @@ class AdminController {
           imagesList.map(img => {
             let newImg = {
               path: img.cloud_id,
+              width: img.width,
+              height: img.height,
               url: img.url
             };
             imagesData.push(newImg);
@@ -139,12 +143,14 @@ class AdminController {
       //Ask for imgs
       if ('files' in req) {
         const images = res.locals.images;
-        const newImages = await images.map(img => {
+        await images.map(img => {
           new Image({
             cloud_id: img.public_id,
             label: item.label,
             folder: item._id,
-            url: img.url
+            width: img.width,
+            height: img.height,
+            url: img.secure_url
           }).save();
         });
       }
@@ -189,12 +195,14 @@ class AdminController {
       //If new imgs are being added
       if ('files' in req) {
         const images = res.locals.images;
-        const newImages = await images.map(img => {
+        await images.map(img => {
           new Image({
             cloud_id: img.public_id,
             label: file.label,
             folder: file._id,
-            url: img.url
+            width: img.width,
+            height: img.height,
+            url: img.secure_url
           }).save();
         });
       }

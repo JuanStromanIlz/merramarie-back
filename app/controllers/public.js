@@ -9,7 +9,11 @@ class PublicController {
      if (homeImages) {
       let list = [];
       homeImages.map(img => {
-        let imgToSend = img.url;
+        let imgToSend = {
+          width: img.width,
+          height: img.height,
+          url: img.url
+        };
         list.push(imgToSend);
       });
       return res.status(200).json(list);
@@ -47,7 +51,11 @@ class PublicController {
           if (imagesPerFolder.length > 0) {
             let imagesData = [];
             imagesPerFolder = imagesPerFolder.map(img => {
-              let newImg = img.url;
+              let newImg = {
+                width: img.width,
+                height: img.height,
+                url: img.url
+              };
               imagesData.push(newImg);
             });
             let itemToSend = {
@@ -88,7 +96,11 @@ class PublicController {
         if (images.length > 0) {
           let imagesData = [];
           images.map(img => {
-            let newImg = img.url;
+            let newImg = {
+              width: img.width,
+              height: img.height,
+              url: img.url
+            };
             imagesData.push(newImg);
           });
           let itemToSend = {
