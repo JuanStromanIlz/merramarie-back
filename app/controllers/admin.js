@@ -12,7 +12,7 @@ class AdminController {
       //Check If User Exists
       let foundUser = await User.findOne({username});
       if (!foundUser) {
-        return res.status(404).json({
+        return res.status(401).json({
           error: 'Ningun usuario bajo este nombre'
         });
       }
