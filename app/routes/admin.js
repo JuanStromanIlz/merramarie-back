@@ -15,7 +15,7 @@ const adminCont = new AdminController();
 /* CHECK IF FOLDER EXISTS */
 import alreadyExists from '../middleware/alreadyExists.js';
 
-adminRouter.post('/', adminCont.logIn);
+adminRouter.post('/log_in', adminCont.logIn);
 //Get items
 adminRouter.get('/label/:label', passport.authenticate('jwt',{session: false}), adminCont.getList);
 adminRouter.get('/folder/:name', passport.authenticate('jwt',{session: false}), adminCont.getItem);
