@@ -189,7 +189,7 @@ class AdminController {
         let deletePromises = deleteImgsArray.map(path => Image.deleteOne({cloud_id: path}));
         let deletedImages = Promise.all(deletePromises);
         if (deletedImages) {
-          let cloudPromises = updateItem.deleteImgs.map(path => uploader.destroy(path));
+          let cloudPromises = deleteImgsArray.map(path => uploader.destroy(path));
           Promise.all(cloudPromises);
         }
       }
