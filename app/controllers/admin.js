@@ -185,7 +185,8 @@ class AdminController {
       const file = await File.findOneAndUpdate({route_title: name}, changesToItem, {new: true});
       //If images was deleted
       if (updateItem.deleteImgs != undefined) {
-        let deletePromises = updateItem.deleteImgs.map(path => Image.deleteOne({cloud_id: path}));
+        let deleteImgsArray = updateItem.deleteImgs.split(',');
+        let deletePromises = deleteImgsArray.map(path => Image.deleteOne({cloud_id: path}));
         let deletedImages = Promise.all(deletePromises);
         if (deletedImages) {
           let cloudPromises = updateItem.deleteImgs.map(path => uploader.destroy(path));
