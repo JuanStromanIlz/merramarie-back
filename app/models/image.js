@@ -4,8 +4,8 @@ const imageSchema = mongoose.Schema({
   cloud_id: String,
   label: String,
   folder: String,
-  width: String,
-  height: String,
+  width: Number,
+  height: Number,
   url: String
 });
 
