@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import File from '../models/file.js';
 import Image from '../models/image.js';
 import User from '../models/user.js';
-import {uploader} from '../config/cloudinary.js';
+import { uploader } from '../config/cloudinary.js';
 
 class AdminController {
   /* LOG IN */
@@ -37,7 +37,7 @@ class AdminController {
     const labelToGet = req.params.label;
     try {
       const list = await File.find({label: labelToGet});
-      const imagesList = await Image.find({label: labelToGet});
+      const imagesList = await Image.find({});
       const data = [];
       if (list && imagesList) {
         list.map(item => {
@@ -86,8 +86,10 @@ class AdminController {
     const routeTitle = req.params.name;
     try {
       const item = await File.findOne({route_title: routeTitle});
+      // Get the next record in a label
+      const nextOne = await File.find({_id: {$gt: item._id}, label: item.label}).sort({_id: 1}).limit(1);
       const imagesList = await Image.find({folder: item._id});
-      if (item && imagesList) {
+      if (item && imagesList && nextOne) {
         if (imagesList.length > 0) {
           let imagesData = [];
           imagesList.map(img => {
@@ -106,7 +108,8 @@ class AdminController {
             route_title: item.route_title,
             description: item.description,
             videoLink: item.videoLink,
-            images: imagesData
+            images: imagesData,
+            nextFolder: nextOne.length > 0 ? nextOne[0].route_title : null
           };
           return res.status(200).json(itemToSend);
         } else {
@@ -116,7 +119,8 @@ class AdminController {
             title: item.title,
             route_title: item.route_title,
             description: item.description,
-            videoLink: item.videoLink
+            videoLink: item.videoLink,
+            nextFolder: nextOne.length > 0 ? nextOne[0].route_title : null
           };
           return res.status(200).json(itemToSend);
         }
@@ -146,7 +150,6 @@ class AdminController {
         await images.map(img => {
           new Image({
             cloud_id: img.public_id,
-            label: item.label,
             folder: item._id,
             width: img.width,
             height: img.height,
@@ -199,7 +202,6 @@ class AdminController {
         await images.map(img => {
           new Image({
             cloud_id: img.public_id,
-            label: file.label,
             folder: file._id,
             width: img.width,
             height: img.height,

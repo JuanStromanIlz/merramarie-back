@@ -43,7 +43,7 @@ class PublicController {
     let labelToGet = req.params.label;
     try {
       const list = await File.find({label: labelToGet});
-      const imagesList = await Image.find({label: labelToGet});
+      const imagesList = await Image.find({});
       let data = [];
       if (list && imagesList) {
         list.map(item => {
@@ -91,8 +91,10 @@ class PublicController {
     let routeTitle = req.params.name;
     try {
       const item = await File.findOne({route_title: routeTitle});
+      // Get the next record in a label
+      const nextOne = await File.find({_id: {$gt: item._id}, label: item.label}).sort({_id: 1}).limit(1);
       let images = await Image.find({folder: item._id});
-      if (item && images) {
+      if (item && images && nextOne) {
         if (images.length > 0) {
           let imagesData = [];
           images.map(img => {
@@ -110,7 +112,8 @@ class PublicController {
             route_title: item.route_title,
             description: item.description,
             videoLink: item.videoLink,
-            images: imagesData
+            images: imagesData,
+            nextFolder: nextOne.length > 0 ? nextOne[0].route_title : null
           };
           return res.status(200).json(itemToSend);
         } else {
@@ -120,7 +123,8 @@ class PublicController {
             title: item.title,
             route_title: item.route_title,
             description: item.description,
-            videoLink: item.videoLink
+            videoLink: item.videoLink,
+            nextFolder: nextOne.length > 0 ? nextOne[0].route_title : null
           };
           return res.status(200).json(itemToSend);
         }
