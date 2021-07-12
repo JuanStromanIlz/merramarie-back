@@ -220,13 +220,16 @@ class AdminController {
     try {
       //Delete the folder and use his id to delete Images model and cloud host
       let folder = await File.findOneAndDelete({route_title: name});
-      if ('images' in folder) {
-        let imagesToDelete = await Image.find({folder: folder._id});
-        imagesToDelete = imagesToDelete.map(({cloud_id}) => uploader.destroy(cloud_id));
-        let cloudDeleted = Promise.all(imagesToDelete);
-        let imagesDeleted = await Image.deleteMany({folder: folder._id});
+      let imagesToDelete = await Image.find({folder: folder._id});
+      if (imagesToDelete.length > 0) {
+        let imagesPromises = imagesToDelete.map(({cloud_id}) => uploader.destroy(cloud_id));
+        Promise.all(imagesPromises);
+        Image.deleteMany({folder: folder._id}).then(() => {
+          return res.status(200).json({message: 'Item eliminado con exito'});
+        });
+      } else {
+        return res.status(200).json({message: 'Item eliminado con exito'});
       }
-      return res.status(200).json({message: 'Item eliminado con exito'});
     } catch(err) {
       next(err);
     }
