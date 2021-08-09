@@ -7,7 +7,7 @@ const filesSchema = new mongoose.Schema({
   route_title: String,
   description: String,
   videoLink: String
-});
+}, { timestamps: { createdAt: 'created_at' } });
 
 const File = mongoose.model('File', filesSchema);
 

@@ -36,7 +36,7 @@ class AdminController {
   async getList(req, res, next) {
     const labelToGet = req.params.label;
     try {
-      const list = await File.find({label: labelToGet});
+      const list = await File.find({label: labelToGet}).sort({'created_at': -1});;
       const imagesList = await Image.find({});
       const data = [];
       if (list && imagesList) {
@@ -87,7 +87,7 @@ class AdminController {
     try {
       const item = await File.findOne({route_title: routeTitle});
       // Get the next record in a label
-      const nextOne = await File.find({_id: {$gt: item._id}, label: item.label}).sort({_id: 1}).limit(1);
+      const nextOne = await File.find({_id: {$gt: item._id}, label: item.label}).sort({'created_at': -1}).limit(1);
       const imagesList = await Image.find({folder: item._id});
       if (item && imagesList && nextOne) {
         if (imagesList.length > 0) {
