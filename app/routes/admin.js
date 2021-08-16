@@ -17,8 +17,8 @@ import alreadyExists from '../middleware/alreadyExists.js';
 
 adminRouter.post('/log_in', adminCont.logIn);
 //Get items
-adminRouter.get('/label/:label', passport.authenticate('jwt',{session: false}), adminCont.getList);
-adminRouter.get('/folder/:name', passport.authenticate('jwt',{session: false}), adminCont.getItem);
+adminRouter.get('/:label', passport.authenticate('jwt',{session: false}), adminCont.getList);
+adminRouter.get('/:label/:folder', passport.authenticate('jwt',{session: false}), adminCont.getItem);
 //New item
 adminRouter.post('/new', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.newItem);
 adminRouter.post('/new_with_imgs', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.newItem);

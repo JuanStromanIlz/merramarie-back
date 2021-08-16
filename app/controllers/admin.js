@@ -83,13 +83,28 @@ class AdminController {
   }
   /* GET ITEM */
   async getItem(req, res, next) {
-    const routeTitle = req.params.name;
+    const routeTitle = req.params.folder;
+    const folder = req.params.label;
     try {
-      const item = await File.findOne({route_title: routeTitle});
+      const item = await File.findOne({label: folder, route_title: routeTitle});
       // Get the next record in a label
-      const nextOne = await File.find({_id: {$gt: item._id}, label: item.label}).sort({'created_at': -1}).limit(1);
+      let nextOne = null;
+      const label = await File.find({label: item.label}).sort({'created_at': -1});
+      if (label) {
+        for (let i = 0; i < label.length; i++) {
+          let folder = label[i];
+          let nextFolder = i+1;
+          if (folder.title === item.title) {
+            if (nextFolder < label.length) {
+              nextOne = label[nextFolder];
+            } else {
+              nextOne = null;
+            }
+          }
+        }
+      }
       const imagesList = await Image.find({folder: item._id});
-      if (item && imagesList && nextOne) {
+      if (item && imagesList && label) {
         if (imagesList.length > 0) {
           let imagesData = [];
           imagesList.map(img => {
@@ -109,7 +124,7 @@ class AdminController {
             description: item.description,
             videoLink: item.videoLink,
             images: imagesData,
-            nextFolder: nextOne.length > 0 ? nextOne[0].route_title : null
+            nextFolder: nextOne
           };
           return res.status(200).json(itemToSend);
         } else {
@@ -120,7 +135,7 @@ class AdminController {
             route_title: item.route_title,
             description: item.description,
             videoLink: item.videoLink,
-            nextFolder: nextOne.length > 0 ? nextOne[0].route_title : null
+            nextFolder: nextOne
           };
           return res.status(200).json(itemToSend);
         }
