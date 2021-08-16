@@ -5,7 +5,7 @@ const alreadyExists = async (req, res, next) => {
     const {label, title} = req.body;
     const alreadyExists = await File.findOne({label: label, title: title});
     if (alreadyExists) {
-      return res.status(400);
+      return res.status(400).send('Titulo existente');
     } else {
       next();
     }
