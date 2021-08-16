@@ -179,7 +179,7 @@ class AdminController {
   }
   /* UPDATE ITEM */
   async updateItem(req, res, next) {
-    const {name} = req.params;
+    const {label, folder} = req.params;
     const updateItem = req.body;
     const keysToDelete = {};
     for (let prop in updateItem) {
@@ -200,7 +200,7 @@ class AdminController {
     }
     try {
       const changesToItem = { $set: {...updateItem}, $unset: {...keysToDelete}};
-      const file = await File.findOneAndUpdate({route_title: name}, changesToItem, {new: true});
+      const file = await File.findOneAndUpdate({label: label, route_title: folder}, changesToItem, {new: true});
       //If images was deleted
       if (updateItem.deleteImgs != undefined) {
         let deleteImgsArray = updateItem.deleteImgs.split(',');
@@ -231,15 +231,15 @@ class AdminController {
   }
   /* DELETE ITEM */
   async deleteItem(req, res, next) {
-    const {name} = req.params;
+    const {label, folder} = req.params;
     try {
       //Delete the folder and use his id to delete Images model and cloud host
-      let folder = await File.findOneAndDelete({route_title: name});
-      let imagesToDelete = await Image.find({folder: folder._id});
+      let folderDelete = await File.findOneAndDelete({label: label, route_title: folder});
+      let imagesToDelete = await Image.find({folder: folderDelete._id});
       if (imagesToDelete.length > 0) {
         let imagesPromises = imagesToDelete.map(({cloud_id}) => uploader.destroy(cloud_id));
         Promise.all(imagesPromises);
-        Image.deleteMany({folder: folder._id}).then(() => {
+        Image.deleteMany({folder: folderDelete._id}).then(() => {
           return res.status(200).json({message: 'Item eliminado con exito'});
         });
       } else {

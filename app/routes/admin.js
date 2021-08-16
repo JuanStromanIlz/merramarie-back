@@ -23,9 +23,9 @@ adminRouter.get('/:label/:folder', passport.authenticate('jwt',{session: false})
 adminRouter.post('/new', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.newItem);
 adminRouter.post('/new_with_imgs', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.newItem);
 //Edit item
-adminRouter.patch('/edit/:name', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.updateItem);
-adminRouter.patch('/edit_new_imgs/:name', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.updateItem);
+adminRouter.patch('/edit/:label/:folder', passport.authenticate('jwt',{session: false}), alreadyExists, adminCont.updateItem);
+adminRouter.patch('/edit_new_imgs/:label/:folder', passport.authenticate('jwt',{session: false}), multerUploads.array('images'), alreadyExists, formatToUpload, adminCont.updateItem);
 //Delete item
-adminRouter.delete('/delete/:name', passport.authenticate('jwt',{session: false}), adminCont.deleteItem);
+adminRouter.delete('/delete/:label/:folder', passport.authenticate('jwt',{session: false}), adminCont.deleteItem);
 
 export default adminRouter;
