@@ -42,7 +42,7 @@ class PublicController {
   async getList(req, res, next) {
     let labelToGet = req.params.label;
     try {
-      const list = await File.find({label: labelToGet}).sort({'created_at': -1});
+      const list = await File.find({label: labelToGet}).sort({'updatedAt': -1});
       const imagesList = await Image.find({});
       let data = [];
       if (list && imagesList) {

@@ -89,7 +89,7 @@ class AdminController {
       const item = await File.findOne({label: folder, route_title: routeTitle});
       // Get the next record in a label
       let nextOne = null;
-      const label = await File.find({label: item.label}).sort({'created_at': -1});
+      const label = await File.find({label: item.label}).sort({'updatedAt': -1});
       if (label) {
         for (let i = 0; i < label.length; i++) {
           let folder = label[i];

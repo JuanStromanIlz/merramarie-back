@@ -30,7 +30,7 @@ app.use(passport.initialize());
 import cors from 'cors';
 if (process.env.CORS == 'true') {
   const corsOptions = {
-    origin: [process.env.FRONTEND_HOST],
+    origin: [process.env.FRONTEND_HOST, process.env.DEV_HOST],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders:  ['Content-Type', 'Authorization'],
     exposedHeaders: ['Authorization'],
