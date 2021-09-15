@@ -149,6 +149,7 @@ class AdminController {
     let {label, category, title, description, videoLink} = req.body;
     title = title.trim();
     let routeTitle = title.toLowerCase();
+    routeTitle = routeTitle.replace(/[^a-zA-Z ]/g, "");
     routeTitle = routeTitle.replace(/ /g, '_');
     try {
       const item = await new File({
@@ -194,6 +195,7 @@ class AdminController {
     if ('title' in updateItem) {
       let title = updateItem.title.trim();
       let routeTitle = title.toLowerCase();
+      routeTitle = routeTitle.replace(/[^a-zA-Z ]/g, "");
       routeTitle = routeTitle.replace(/ /g, '_');
       updateItem.title = title;
       updateItem.route_title = routeTitle;
